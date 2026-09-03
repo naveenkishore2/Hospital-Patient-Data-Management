@@ -29,7 +29,6 @@ This project is developed using Python and SQLite to manage hospital patient inf
 
 ## Project Structure
 
-```text
 Hospital-Patient-Data-Management/
 │
 ├── hospital_patient_management.py
@@ -40,17 +39,13 @@ Hospital-Patient-Data-Management/
     ├── original_records.png
     ├── cleaned_records.png
     └── test_results.png
-```
 
-## How to Run
 
 1. Download or clone the repository.
 2. Open the project folder.
 3. Run the following command:
 
-```bash
 python hospital_patient_management.py
-```
 
 ## Output
 
