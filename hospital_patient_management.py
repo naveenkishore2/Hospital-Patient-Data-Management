@@ -8,9 +8,7 @@ def clean_name(name):
 def clean_gender(gender):
     if gender is None:
         return "Unknown"
-
     gender = gender.strip().lower()
-
     if gender in ["male", "m"]:
         return "Male"
     elif gender in ["female", "f"]:
@@ -37,71 +35,41 @@ def find_fuzzy_duplicates(records):
     print("-" * 60)
     found = False
     for i in range(len(records)):
-
         for j in range(i + 1, len(records)):
-
             record1 = records[i]
             record2 = records[j]
-
             name1 = record1[1]
             name2 = record2[1]
-
             phone1 = record1[4]
             phone2 = record2[4]
-
             email1 = record1[5]
             email2 = record2[5]
-
             similarity = SequenceMatcher(
                 None,
                 name1.lower(),
                 name2.lower()
             ).ratio() * 100
-
             if similarity >= 80:
-
                 if phone1 == phone2 or email1 == email2:
-
                     print(
                         "Possible duplicate:",
                         name1,
                         "<->",
                         name2
                     )
-
                     print(
                         "Name similarity:",
                         round(similarity, 2),
                         "%"
                     )
-
                     found = True
-
     if not found:
         print("No potential duplicates found.")
-
-
-# --------------------------------------------------
-# MAIN FUNCTION
-# --------------------------------------------------
 def main():
-
     try:
-
-        # ------------------------------------------
-        # DATABASE CONNECTION
-        # ------------------------------------------
-
         conn = sqlite3.connect("hospital.db")
         cursor = conn.cursor()
-
         print("Database connected successfully!")
-
-
-        # ------------------------------------------
-        # CREATE PATIENT TABLE
-        # ------------------------------------------
-
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS Patient (
             Patient_ID INTEGER PRIMARY KEY,
@@ -113,12 +81,6 @@ def main():
             Diagnosis TEXT
         )
         """)
-
-
-        # ------------------------------------------
-        # CREATE CLEAN_PATIENT TABLE
-        # ------------------------------------------
-
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS Clean_Patient (
             Patient_ID INTEGER PRIMARY KEY,
@@ -130,102 +92,47 @@ def main():
             Diagnosis TEXT
         )
         """)
-
-
-        # Clear old records
         cursor.execute("DELETE FROM Patient")
         cursor.execute("DELETE FROM Clean_Patient")
-
         conn.commit()
-
         print("Tables created successfully!")
-
-
-        # ------------------------------------------
-        # DIRTY PATIENT RECORDS
-        # ------------------------------------------
-
         patients = [
-
             (1, "RAHUL kumar", 25, "male",
              "9876543210", "rahul@gmail.com", "Fever"),
-
             (2, "rahul KUMAR", 25, "Male",
              "9876543210", "rahul@gmail.com", "Fever"),
-
             (3, "Anitha Devi", 30, "FEMALE",
              "987654321", "anitha@gmail.com", "Diabetes"),
-
             (4, "Ramesh Kumar", -5, "Male",
              "9876543211", "ramesh@gmail.com", "Cold"),
-
             (5, "Priya Sharma", 135, "female",
              "9876543212", "priya@gmail.com", "Headache"),
-
             (6, "Arun Kumar", 28, "M",
              None, "arun@gmail.com", "Fever"),
-
             (7, "Meena", 35, "Female",
              "9876543213", None, "Diabetes"),
-
             (8, "  Karthik   Raj  ", 40, "MALE",
              "abcdefghij", "karthik@gmail.com", "Cold"),
-
             (9, "Suresh Kumar", 45, "Male",
              "9876543214", "suresh@gmail.com",
              "Heart Problem"),
-
             (10, "Suresh Kumaar", 45, "male",
              "9876543214", "suresh123@gmail.com",
              "Heart Problem")
         ]
-
-
-        # ------------------------------------------
-        # INSERT RECORDS
-        # ------------------------------------------
-
         cursor.executemany("""
         INSERT INTO Patient
         (Patient_ID, Name, Age, Gender, Phone, Email, Diagnosis)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         """, patients)
-
         conn.commit()
-
         print("Patient records inserted successfully!")
-
-
-        # ------------------------------------------
-        # DISPLAY ORIGINAL RECORDS
-        # ------------------------------------------
-
-        print("\n")
-        print("=" * 70)
-        print("ORIGINAL PATIENT RECORDS")
-        print("=" * 70)
-
-        cursor.execute("SELECT * FROM Patient")
-
-        original_records = cursor.fetchall()
-
-        for row in original_records:
-            print(row)
-
-
-        # ------------------------------------------
-        # DATA CLEANING
-        # ------------------------------------------
-
         cleaned_records = []
         seen_records = set()
-
         print("\n")
         print("=" * 70)
         print("DATA CLEANING PROCESS")
         print("=" * 70)
-
-
         for record in original_records:
 
             patient_id = record[0]
@@ -278,12 +185,6 @@ def main():
                 )
 
                 email = "Not Available"
-
-
-            # --------------------------------------
-            # EXACT DUPLICATE DETECTION
-            # --------------------------------------
-
             duplicate_key = (
                 name.lower(),
                 age,
@@ -319,17 +220,7 @@ def main():
                 )
             )
 
-
-        # ------------------------------------------
-        # FUZZY MATCHING
-        # ------------------------------------------
-
         find_fuzzy_duplicates(cleaned_records)
-
-
-        # ------------------------------------------
-        # STORE CLEAN RECORDS
-        # ------------------------------------------
 
         cursor.executemany("""
         INSERT INTO Clean_Patient
@@ -341,11 +232,6 @@ def main():
 
         print("\nCleaned records stored successfully!")
 
-
-        # ------------------------------------------
-        # DISPLAY CLEANED RECORDS
-        # ------------------------------------------
-
         print("\n")
         print("=" * 70)
         print("CLEANED PATIENT RECORDS")
@@ -355,11 +241,6 @@ def main():
 
         for row in cursor.fetchall():
             print(row)
-
-
-        # ------------------------------------------
-        # UPDATE OPERATION
-        # ------------------------------------------
 
         print("\n")
         print("=" * 70)
@@ -382,11 +263,6 @@ def main():
         print("Updated Record:")
         print(cursor.fetchone())
 
-
-        # ------------------------------------------
-        # DELETE OPERATION
-        # ------------------------------------------
-
         print("\n")
         print("=" * 70)
         print("DELETE OPERATION")
@@ -400,11 +276,6 @@ def main():
         conn.commit()
 
         print("Record deletion operation completed.")
-
-
-        # ------------------------------------------
-        # TEST WITH NEW UNSEEN DIRTY DATA
-        # ------------------------------------------
 
         print("\n")
         print("=" * 70)
